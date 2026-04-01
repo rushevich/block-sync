@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <vector>
 
 int main(int, char**){
-    std::cout << "Hello, from block-sync!\nPlease enter the path to your /PrismLauncher directory: ";
+    std::cout << "Hello, from block-sync!\nPlease enter the path to your PrismLauncher directory: ";
     
     std::string inp;
     std::cin >> inp;
@@ -40,5 +41,24 @@ int main(int, char**){
 
     std::cout << "Found instances directory: " << instance_dir << std::endl;
 
+    std::vector<std::filesystem::directory_entry> instances;
+
+    for (auto const& dir_entry : std::filesystem::directory_iterator(instance_dir)) {
+        if (std::filesystem::is_directory(dir_entry)) instances.push_back(dir_entry);
+    }
+
+    std::cout << "Select the instance to be synced: \n";
+
+    for (size_t idx = 0; idx < instances.size(); idx++) {
+        std::string instance_path{instances[idx].path().string()};
+        std::string instance_name{instance_path.substr(instance_path.find("/instances/")+11)};
+        std::cout << idx << ". " << instance_name << std::endl;
+    }
+
+    std::cout << "\nEnter a number (i.e. 0, 1, ...)\n";
+    
+    int selected_instance{};
+    std::cin >> selected_instance;
+    
     return 0;
 }
