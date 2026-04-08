@@ -9,8 +9,8 @@ _Ordering reflects a **small** amount of precedence: earlier rows tend to unbloc
 | Checkpoint | Status |
 | --- | --- |
 | Chunked file hashing (SHA-256 per block) | Done |
-| CLI: Prism path → `prismlauncher.cfg` → instance pick | Done (needs testing) |
-| Robust cfg parsing & cross-platform paths | Done (needs testing) |
+| CLI: Prism path → `prismlauncher.cfg` → instance pick | In Progress |
+| Robust cfg parsing & cross-platform paths | In Progress |
 | Basic CI workflow | Planned |
 | Prism/instance discovery in its own module | Planned |
 | Manifest + sync logic | Planned |
