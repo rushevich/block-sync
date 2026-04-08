@@ -4,14 +4,20 @@ block-sync is a tool designed to allow Prism launcher users to efficiently sync 
 
 ## Checkpoints
 
+_Ordering reflects a **small** amount of precedence: earlier rows tend to unblock or harden later work. It is still not a strict schedule._
+
 | Checkpoint | Status |
 | --- | --- |
 | Chunked file hashing (SHA-256 per block) | Done |
 | CLI: Prism path → `prismlauncher.cfg` → instance pick | In progress |
 | Robust cfg parsing & cross-platform paths | Planned |
+| Basic CI workflow | Planned |
 | Prism/instance discovery in its own module | Planned |
 | Manifest + sync logic | Planned |
 | Tests | Planned |
+| Hashing optimization (mmap) | Planned |
+| Migration from CLI to basic GUI | Planned |
+| Monolith server integration | Planned |
 
 ## Directory layout
 
