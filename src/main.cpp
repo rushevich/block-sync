@@ -2,8 +2,12 @@
 #include <fstream>
 #include <filesystem>
 #include <vector>
+#include "util/helpers.h"
 
 int main(int, char**){
+    detect_os();
+    std::cout << "(DEBUG) User OS: " << user_os << std::endl;
+
     std::cout << "Hello, from block-sync!\nPlease enter the path to your PrismLauncher directory: ";
     
     std::string inp;
