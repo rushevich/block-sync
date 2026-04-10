@@ -3,8 +3,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
-
+/*
+ Prism paths per OS:
+     Windows: %APPDATA%/PrismLauncher
+     MacOS: ~/Library/Application Support/PrismLauncher
+     Linux: ~/.local/share/PrismLauncher
+ */
 namespace fs = std::filesystem;
 
 // prevents global visibility
@@ -44,8 +50,43 @@ fs::path get_user_data_root() {
   }
   return {};
 }
-} // namespace
 
+// needs revision to trim whitespace
+fs::path resolve_prism_instance_path(const fs::path &prism_root) {
+  std::ifstream prism_config{prism_root / "prismlauncher.cfg"};
+  if (!prism_config.is_open()) {
+    return {};
+  }
+
+  std::string line;
+  while (std::getline(prism_config, line)) {
+    if (line.find("InstanceDir") != std::string::npos)
+      break;
+  }
+
+  return (line.find("InstanceDir") == std::string::npos)
+             ? fs::path{}
+             : fs::path{prism_root / line.substr(line.find('=') + 1)};
+}
+
+void get_instance_selection(int &selected_instance,
+                           const size_t &highest_instance_index) {
+  while (true) {
+    std::cout << "\nEnter a number (i.e. 0, 1, ...), or -1 to quit:\n";
+    std::cin >> selected_instance;
+    if (selected_instance == -1) return; 
+    if (!std::cin ||
+        (selected_instance < 0 || selected_instance > highest_instance_index)) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      std::cout << "Invalid selection. Try again.";
+      continue;
+    }
+    return;
+  }
+}
+
+} // namespace
 
 int main(int, char **) {
   detect_os();
@@ -55,26 +96,20 @@ int main(int, char **) {
   std::cout << "(DEBUG) User Data Root: " << user_data_root << std::endl;
 
   fs::path prism_root{user_data_root / "PrismLauncher"};
+
   if (!fs::exists(prism_root)) {
-    std::cout << "(DEBUG) PrismLauncher directory not found.";
-    return 0;
+    std::cerr << "(DEBUG) PrismLauncher directory not found.";
+    return 1;
   }
+
   std::cout << "(DEBUG) PrismLauncher: " << prism_root << std::endl;
 
-  std::ifstream prism_config{prism_root / "prismlauncher.cfg"};
-
-  std::string line;
-  while (std::getline(prism_config, line)) {
-    if (line.find("InstanceDir") != std::string::npos)
-      break;
+  fs::path instance_dir{resolve_prism_instance_path(prism_root)};
+  if (instance_dir.empty() || !fs::is_directory(instance_dir)) {
+    std::cerr << "(DEBUG): Instance directory is not valid.";
+    return 1;
   }
 
-  fs::path instance_dir{prism_root / line.substr(line.find('=') + 1)};
-
-  if (!fs::exists(instance_dir)) {
-    std::cout << "(DEBUG) Instances not found.";
-    return 0;
-  }
   std::cout << "(DEBUG) Instances: " << instance_dir << std::endl;
 
   std::vector<std::filesystem::directory_entry> instances;
@@ -85,25 +120,24 @@ int main(int, char **) {
       instances.push_back(dir_entry);
   }
 
+  if (instances.empty()) {
+    std::cerr << "(DEBUG) No instances found.";
+    return 1;
+  }
+
   std::cout << "Select the instance to be synced: \n";
 
   for (size_t idx = 0; idx < instances.size(); idx++) {
     std::string instance_path{instances[idx].path().string()};
-    std::string instance_name{
-        instance_path.substr(instance_path.find("/instances/") + 11)};
+    std::string instance_name{instances[idx].path().filename().string()};
     std::cout << idx << ". " << instance_name << std::endl;
   }
 
-  std::cout << "\nEnter a number (i.e. 0, 1, ...)\n";
-
-  int selected_instance{};
-  std::cin >> selected_instance;
-  /*
-  Prism paths per OS:
-      Windows: %APPDATA%/PrismLauncher
-      MacOS: ~/Library/Application Support/PrismLauncher
-      Linux: ~/.local/share/PrismLauncher
-  */
-
+  int selected_instance;
+  get_instance_selection(selected_instance, instances.size()-1);
+  if (selected_instance == -1) {
+    std::cout << "Quitting...\n"; 
+    return 0;
+  }
   return 0;
 }
