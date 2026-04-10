@@ -7,15 +7,43 @@
 
 namespace fs = std::filesystem;
 
+// prevents global visibility
+namespace {
+
+fs::path env_path(const char *name) {
+  const char *source{std::getenv(name)};
+  if (!source || !*source) {
+    return {};
+  }
+  return fs::path(source);
+}
+
 fs::path get_user_data_root() {
-  if (user_os == "WINDOWS")
+  if (user_os == "WINDOWS") {
     return fs::path{std::getenv("APPDATA")};
-  else if (user_os == "LINUX")
-    return fs::path{std::getenv("XDG_CONFIG_HOME")};
-  else if (user_os == "MACOS")
-    return fs::path{std::getenv("HOME")} / "Library/Application\ Support";
-  return fs::path{};
-};
+  }
+  if (user_os == "LINUX") {
+    fs::path data{env_path("XDG_DATA_HOME")};
+    if (!data.empty()) {
+      return data;
+    }
+    fs::path home{env_path("HOME")};
+    if (!home.empty()) {
+      return {};
+    }
+    return home / ".local" / "share";
+  }
+  if (user_os == "MACOS") {
+    fs::path home{env_path("HOME")};
+    if (home.empty()) {
+      return {};
+    }
+    return home / "Library" / "Application Support";
+  }
+  return {};
+}
+} // namespace
+
 
 int main(int, char **) {
   detect_os();
