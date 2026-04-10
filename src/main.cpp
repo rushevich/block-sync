@@ -139,5 +139,12 @@ int main(int, char **) {
     std::cout << "Quitting...\n"; 
     return 0;
   }
+
+  /*
+  next to do:
+  - create function, most likely in core, to recursively hash the instance directory and store it to a temporary file in user data.
+  - create function to write manifest.yaml file
+  - add functionality to create block-sync config file+folder in user data directory --> would help with modularizing main and avoiding path deduction every time
+  */
   return 0;
 }
