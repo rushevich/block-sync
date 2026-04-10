@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 // prevents global visibility
 namespace {
 
+// safe helper for getenv
 fs::path env_path(const char *name) {
   const char *source{std::getenv(name)};
   if (!source || !*source) {
@@ -18,9 +19,10 @@ fs::path env_path(const char *name) {
   return fs::path(source);
 }
 
+// retrieves path for large user data
 fs::path get_user_data_root() {
   if (user_os == "WINDOWS") {
-    return fs::path{std::getenv("APPDATA")};
+    return fs::path{env_path("APPDATA")};
   }
   if (user_os == "LINUX") {
     fs::path data{env_path("XDG_DATA_HOME")};
@@ -28,7 +30,7 @@ fs::path get_user_data_root() {
       return data;
     }
     fs::path home{env_path("HOME")};
-    if (!home.empty()) {
+    if (home.empty()) {
       return {};
     }
     return home / ".local" / "share";
