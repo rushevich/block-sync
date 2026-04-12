@@ -10,7 +10,7 @@
 
 #define MEGABYTE 1024 * 1024
 
-std::string hash_block(const std::vector<unsigned char>& block_data) {
+std::string hash_block(const std::span<const unsigned char>& block_data) {
   EVP_MD_CTX* ctx = EVP_MD_CTX_new();
   unsigned char hash[EVP_MAX_MD_SIZE /* =64 */];
   unsigned int lengthOfHash{};
@@ -40,8 +40,7 @@ HashedFile hash_file(const std::string& path_to_file) {
                    static_cast<std::streamsize>(block_size)) ||
          file.gcount() > 0) {
     std::streamsize actual_bytes = file.gcount();
-    hashes.push_back(hash_block(std::vector<unsigned char>(
-        buf.begin(), buf.begin() + static_cast<std::ptrdiff_t>(actual_bytes))));
+  hashes.push_back(hash_block(std::span(buf.data(), static_cast<size_t>(actual_bytes))));
   }
   return HashedFile(hashes, path_to_file, std::chrono::system_clock::now());
 };

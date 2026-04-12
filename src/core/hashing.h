@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <span>
 
 struct HashedFile {
   HashedFile(std::vector<std::string> v, std::string p,
@@ -45,7 +46,7 @@ struct HashedFile {
   std::vector<std::string> hashed_blocks_;
 };
 
-std::string hash_block(const std::vector<unsigned char>& block_data);
+std::string hash_block(const std::span<const unsigned char>& block_data);
 
 HashedFile hash_file(const std::string& path_to_file);
 
