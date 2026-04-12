@@ -7,7 +7,9 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 #define MEGABYTE 1024 * 1024
 
 std::string hash_block(const std::span<const unsigned char>& block_data) {
@@ -43,4 +45,9 @@ HashedFile hash_file(const std::string& path_to_file) {
   hashes.push_back(hash_block(std::span(buf.data(), static_cast<size_t>(actual_bytes))));
   }
   return HashedFile(hashes, path_to_file, std::chrono::system_clock::now());
+};
+
+
+void write_manifest(const fs::path &destination_path, const std::string& instance_name) {
+  json manifest; manifest["instance_name"] = instance_name; 
 };

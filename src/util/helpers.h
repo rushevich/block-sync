@@ -10,4 +10,5 @@ void detect_os();
 // checks for block-sync config file, returns true if found
 bool config_found();
 
+std::string get_iso8601_time();
 #endif

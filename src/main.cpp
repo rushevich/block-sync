@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "util/helpers.h"
+#include "core/hashing.h"
+
 /*
  Prism paths per OS:
      Windows: %APPDATA%/PrismLauncher
