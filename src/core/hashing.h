@@ -2,13 +2,10 @@
 #define BLOCKSYNC_CORE_HASHING_H
 
 #include <chrono>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
-#include <span>
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 struct HashedFile {
   HashedFile(std::vector<std::string> v, std::string p,
@@ -52,7 +49,5 @@ struct HashedFile {
 std::string hash_block(const std::span<const unsigned char>& block_data);
 
 HashedFile hash_file(const std::string& path_to_file);
-
-void write_manifest(const fs::path& destination_path);
 
 #endif
