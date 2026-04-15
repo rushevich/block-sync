@@ -28,4 +28,8 @@ The current layout (`src/main.cpp`, `src/core/`, `src/util/`) is **provisional**
 
 When complexity warrants it, a likely direction is: a small **library target** for sync, hashing, and manifests (e.g. under `src/blocksync/` or similar), a thin **CLI entry** (e.g. `src/cli/main.cpp`), a **Prism-focused module** for launcher paths and config, optional **`include/<project>/`** headers if the library is reused or installed, and **`tests/`** laid out to mirror the library. None of that is required until maintenance or feature size makes the split worthwhile.
 
+## Contributing
+
+Currently I would like to continue being the sole contributor, due to the educational nature of the project. This section is mostly for completeness, since I don't expect this idea to take off and see massive interest anyway. With that said though, I **greatly** appreciate any feedback, comments, or new implementation ideas - I'm programming this off the dome so I certainly have made and will make poor design choices, so any pointers (lol) are very welcome.
+
 *DISCLAIMER*: AI was used to assist in writing this markdown file.
