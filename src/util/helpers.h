@@ -1,5 +1,5 @@
-#ifndef BLOCKSYNC_HELPERS_H
-#define BLOCKSYNC_HELPERS_H
+#ifndef BLOCKSYNC_UTIL_HELPERS_H
+#define BLOCKSYNC_UTIL_HELPERS_H
 #include <string>
 
 extern std::string user_os;

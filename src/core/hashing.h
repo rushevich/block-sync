@@ -1,17 +1,18 @@
 #ifndef BLOCKSYNC_CORE_HASHING_H
 #define BLOCKSYNC_CORE_HASHING_H
 
-#include <chrono>
 #include <filesystem>
 #include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "../util/helpers.h"
+
 namespace fs = std::filesystem;
 
 struct HashedFile {
-  explicit HashedFile(fs::path p);
+  HashedFile(const fs::path& p, const uintmax_t& sz);
 
   HashedFile() = delete;  // disallow inexplicit construction
 
@@ -24,26 +25,37 @@ struct HashedFile {
     if (this != &other) {
       hashed_blocks_ = std::move(other.hashed_blocks_);
       file_path_ = std::move(other.file_path_);
-      write_time_ = other.write_time_;
+      hash_time_ = std::move(other.hash_time_);
+      block_size_ = std::move(other.block_size_);
+      file_size_ = std::move(other.file_size_);
     }
     return *this;
   };  // move assignment
 
-  const std::string get_file_path() { return file_path_; }
+  const fs::path& file_path() const { return file_path_; }
 
-  const auto get_write_time() { return write_time_; }
+  std::string hash_time() const { return hash_time_; }
 
-  void update_write_time() { write_time_ = std::chrono::system_clock::now(); }
+  void update_write_time() { hash_time_ = get_iso8601_time(); }
 
-  const auto get_hashed_blocks() { return hashed_blocks_; }
+  const std::vector<std::string>& hashed_blocks() const {
+    return hashed_blocks_;
+  }
 
-  void add_hash(std::string hash) { hashed_blocks_.emplace_back(hash); };
+  void add_hash(std::string hash) {
+    hashed_blocks_.emplace_back(std::move(hash));
+  };
+
+  const uintmax_t file_size() const { return file_size_; }
+
+  const uintmax_t block_size() const { return block_size_; }
 
  private:
-  // below are effectively immutable
   fs::path file_path_;
-  std::chrono::system_clock::time_point write_time_;
+  std::string hash_time_;  // iso 8601 fmt
   std::vector<std::string> hashed_blocks_;
+  uintmax_t block_size_;  // in bytes
+  uintmax_t file_size_;   // in bytes
 };
 
 std::string hash_block(const std::span<const unsigned char>& block_data);

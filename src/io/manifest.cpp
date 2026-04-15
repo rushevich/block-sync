@@ -1,14 +1,18 @@
 #include "manifest.h"
 
 #include <filesystem>
+#include <fstream>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
+
+#include "../core/hashing.h"
 
 using json = nlohmann::json;
 void write_manifest(const fs::path& destination_path,
                     const fs::path& instance_path) {
   json manifest;
   manifest["instance_name"] = instance_path.filename().string();
-  manifest["last_updated"] = "";
+  manifest["last_updated"] = get_iso8601_time();
   manifest["tree"].push_back(build_tree(instance_path, instance_path));
   /*flow:
   - use json pointer that is initially set to "/tree"
@@ -35,6 +39,15 @@ void write_manifest(const fs::path& destination_path,
   /*
   would probably be easier to implement a recursive search in hindsight
   */
+  std::ofstream output_manifest(destination_path / "manifest.json");
+  if (!output_manifest) {
+    throw std::runtime_error("Unable to write manifest in " +
+                             destination_path.string());
+  }
+
+  output_manifest << manifest.dump();
+
+  output_manifest.close();
 };
 
 json build_tree(
@@ -44,14 +57,19 @@ json build_tree(
 
   for (auto const& entry : fs::directory_iterator(cur_path)) {
     tree["name"] = entry.path().filename().string();
-    tree["path"] = (entry.is_directory()) ? "directory" : "file";
-    tree["name"] = entry.path().filename().string();
+    tree["type"] = (entry.is_directory()) ? "directory" : "file";
+    tree["path"] = fs::relative(entry, instance_root).string();
 
     if (entry.is_directory()) {
       tree["children"].push_back(build_tree(entry.path(), instance_root));
     } else {
       // call hash file. but i will add more members to HashedFile so that this
       // code can be simpler.
+      HashedFile hf(hash_file(entry));
+      tree["last_updated"] = hf.hash_time();
+      tree["block_size"] = hf.block_size();
+      tree["file_size"] = hf.file_size();
+      tree["hashes"] = hf.hashed_blocks();
     }
   }
   return tree;
