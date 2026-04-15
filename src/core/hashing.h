@@ -2,13 +2,16 @@
 #define BLOCKSYNC_CORE_HASHING_H
 
 #include <chrono>
+#include <filesystem>
 #include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
+namespace fs = std::filesystem;
+
 struct HashedFile {
-  explicit HashedFile(std::string p);
+  explicit HashedFile(fs::path p);
 
   HashedFile() = delete;  // disallow inexplicit construction
 
@@ -38,13 +41,13 @@ struct HashedFile {
 
  private:
   // below are effectively immutable
-  std::string file_path_;
+  fs::path file_path_;
   std::chrono::system_clock::time_point write_time_;
   std::vector<std::string> hashed_blocks_;
 };
 
 std::string hash_block(const std::span<const unsigned char>& block_data);
 
-HashedFile hash_file(const std::string& path_to_file);
+HashedFile hash_file(const fs::path& input_file_path);
 
 #endif

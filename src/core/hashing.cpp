@@ -13,7 +13,7 @@
 
 #define MEGABYTE 1024 * 1024
 
-HashedFile::HashedFile(std::string p)
+HashedFile::HashedFile(fs::path p)
     : hashed_blocks_{}, file_path_{p}, write_time_{} {};
 
 HashedFile::HashedFile(HashedFile&& other) noexcept
@@ -42,12 +42,12 @@ std::string hash_block(const std::span<const unsigned char>& block_data) {
 };
 
 // reads the file in chunks of 1MB and hashes each chunk
-HashedFile hash_file(const std::string& path_to_file) {
-  HashedFile hf{path_to_file};
+HashedFile hash_file(const fs::path& input_file_path) {
+  HashedFile hf{input_file_path};
 
   const size_t block_size = MEGABYTE;
   std::vector<unsigned char> buf(block_size);
-  std::ifstream file(path_to_file, std::ios::binary);
+  std::ifstream file(input_file_path, std::ios::binary);
 
   while (file.read(reinterpret_cast<char*>(buf.data()),
                    static_cast<std::streamsize>(block_size)) ||
