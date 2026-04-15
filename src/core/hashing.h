@@ -8,21 +8,14 @@
 #include <vector>
 
 struct HashedFile {
-  HashedFile(std::vector<std::string> v, std::string p,
-             std::chrono::system_clock::time_point t)
-      : hashed_blocks_(std::move(v)),
-        file_path_(std::move(p)),
-        write_time_(t) {}
+  explicit HashedFile(std::string p);
 
   HashedFile() = delete;  // disallow inexplicit construction
 
   HashedFile(const HashedFile&) = delete;             // copy constructor
   HashedFile& operator=(const HashedFile&) = delete;  // copy assignment
 
-  HashedFile(HashedFile&& other) noexcept
-      : hashed_blocks_(std::move(other.hashed_blocks_)),
-        file_path_(std::move(other.file_path_)),
-        write_time_(other.write_time_) {}  // move constructor
+  HashedFile(HashedFile&& other) noexcept;
 
   HashedFile& operator=(HashedFile&& other) noexcept {
     if (this != &other) {
@@ -37,7 +30,11 @@ struct HashedFile {
 
   const auto get_write_time() { return write_time_; }
 
-  const auto get_hashed_block() { return hashed_blocks_; }
+  void update_write_time() { write_time_ = std::chrono::system_clock::now(); }
+
+  const auto get_hashed_blocks() { return hashed_blocks_; }
+
+  void add_hash(std::string hash) { hashed_blocks_.emplace_back(hash); };
 
  private:
   // below are effectively immutable
