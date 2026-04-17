@@ -37,8 +37,6 @@ std::string hash_block(const std::span<const unsigned char>& block_data) {
   EVP_DigestUpdate(ctx.get(), block_data.data(), block_data.size());
   EVP_DigestFinal_ex(ctx.get(), hash, &lengthOfHash);
 
-  EVP_MD_CTX_free(ctx.get());
-
   std::stringstream ss;
   for (size_t idx{}; idx < lengthOfHash; ++idx) {
     ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[idx];
