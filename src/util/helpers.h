@@ -25,4 +25,11 @@ fs::path resolve_prism_instance_path(const fs::path& prism_root);
 
 void get_instance_selection(int& selected_instance,
                             const size_t& highest_instance_index);
+
+fs::path initial_setup(
+    const fs::path&
+        user_data_root);  // this gets called if no block-sync config is found
+                          // returns the path to instances folder
+
+fs::path retrieve_instance_dir();
 #endif

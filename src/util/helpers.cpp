@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <toml++/toml.hpp>
 
 namespace fs = std::filesystem;
 std::string user_os{};
@@ -118,3 +119,48 @@ void get_instance_selection(int& selected_instance,
     return;
   }
 }
+
+fs::path initial_setup(const fs::path& user_data_root) {
+  // std::cout << "(DEBUG) block-sync config folder doesn't exist yet.\n";
+  create_config_directory();
+  // std::cout << "(DEBUG) New config folder created at " <<
+  // get_bs_config_path()
+  // << std::endl;
+
+  fs::path prism_root{get_user_data_root() / "PrismLauncher"};
+
+  if (!fs::exists(prism_root)) {
+    // std::cerr << "(DEBUG) PrismLauncher directory not found.";
+    return {};
+  }
+
+  // std::cout << "(DEBUG) PrismLauncher: " << prism_root << std::endl;
+
+  auto instance_dir{resolve_prism_instance_path(prism_root)};
+  if (instance_dir.empty() || !fs::is_directory(instance_dir)) {
+    // std::cerr << "(DEBUG): Instance directory is not valid.";
+    return {};
+  }
+
+  std::ofstream bs_config(get_bs_config_path() / "config.toml");
+  // std::cout << "(DEBUG) Instances: " << instance_dir << std::endl;
+  if (!bs_config) {
+    return {};
+  }
+
+  auto info_tbl = toml::table{{"prism", prism_root.string()},
+                              {"instances", instance_dir.string()}};
+
+  bs_config << info_tbl;
+  return instance_dir;
+}
+
+fs::path retrieve_instance_dir() {
+  toml::table info_tbl =
+      toml::parse_file((get_bs_config_path() / "config.toml").string());
+
+  std::optional<std::string> instances =
+      info_tbl["instances"].value<std::string>();
+
+  return {*instances};
+};

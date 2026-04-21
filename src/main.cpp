@@ -15,47 +15,24 @@
  */
 namespace fs = std::filesystem;
 
-// prevents global visibility
-namespace {
-
-// safe helper for getenv
-
-// retrieves path for large user data
-
-// needs revision to trim whitespace
-
-}  // namespace
-
 int main(int, char**) {
-  std::cout << "(DEBUG) User OS: " << detect_os() << std::endl;
+  // std::cout << "(DEBUG) User OS: " << detect_os() << std::endl;
+  std::ignore = detect_os();
 
-  std::cout << "(DEBUG) User Data Root: " << get_user_data_root() << std::endl;
+  // std::cout << "(DEBUG) User Data Root: " << get_user_data_root() <<
+  // std::endl;
 
-  if (!config_found()) {
-    std::cout << "(DEBUG) block-sync config folder doesn't exist yet.\n";
-    create_config_directory();
-    std::cout << "(DEBUG) New config folder created at " << get_bs_config_path()
-              << std::endl;
-  } else {
-    std::cout << "(DEBUG) block-sync config found at " << get_bs_config_path()
-              << std::endl;
-  }
-  auto prism_root{get_user_data_root() / "PrismLauncher"};
+  fs::path instance_dir{};
+  if (!config_found())
+    instance_dir = initial_setup(get_user_data_root());
+  else
+    instance_dir = retrieve_instance_dir();
 
-  if (!fs::exists(prism_root)) {
-    std::cerr << "(DEBUG) PrismLauncher directory not found.";
+  if (instance_dir.empty()) {
+    std::cerr << "Initial setup failed. Check to make sure you haven't moved "
+                 "the PrismLauncher folder.";
     return 1;
   }
-
-  std::cout << "(DEBUG) PrismLauncher: " << prism_root << std::endl;
-
-  auto instance_dir{resolve_prism_instance_path(prism_root)};
-  if (instance_dir.empty() || !fs::is_directory(instance_dir)) {
-    std::cerr << "(DEBUG): Instance directory is not valid.";
-    return 1;
-  }
-
-  std::cout << "(DEBUG) Instances: " << instance_dir << std::endl;
 
   std::vector<std::filesystem::directory_entry> instances{};
 
@@ -83,16 +60,6 @@ int main(int, char**) {
     std::cout << "Quitting...\n";
     return 0;
   }
-
-  /*
-  next to do:
-  - create function, most likely in core, to recursively hash the instance
-  directory and store it to a temporary file in user data.
-  - create function to write manifest.yaml file
-  - add functionality to create block-sync config file+folder in user data
-  directory --> would help with modularizing main and avoiding path deduction
-  every time
-  */
 
   std::cout << "(DEBUG) Selected instance: "
             << instances[selected_instance].path().filename() << std::endl;
