@@ -17,6 +17,7 @@ find_package(OpenSSL REQUIRED)
 
 add_executable(block-sync src/main.cpp)
 
-target_sources(block-sync PRIVATE ${CMAKE_SOURCE_DIR}/src/core/hashing.cpp ${CMAKE_SOURCE_DIR}/src/util/helpers.cpp ${CMAKE_SOURCE_DIR}/src/io/manifest.cpp)
+target_sources(block-sync PRIVATE ${CMAKE_SOURCE_DIR}/src/core/hashing.cpp ${CMAKE_SOURCE_DIR}/src/util/helpers.cpp ${CMAKE_SOURCE_DIR}/src/io/manifest.cpp
+    src/io/sync.cpp)
 
 target_link_libraries(block-sync PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json tomlplusplus)
