@@ -1,9 +1,11 @@
 #ifndef BLOCKSYNC_UTIL_HELPERS_H
 #define BLOCKSYNC_UTIL_HELPERS_H
 #include <filesystem>
+#include <nlohmann/json.hpp>
 #include <string>
 
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 // function to detect OS and set a global variable
 std::string detect_os();
@@ -32,4 +34,25 @@ fs::path initial_setup(
                           // returns the path to instances folder
 
 fs::path retrieve_instance_dir();
+
+// note that dereferencing the iterator yields the value at the current key
+template <typename UnaryFunction>
+auto recursive_json_iterate_if(json& j, UnaryFunction f)
+    -> void {  // an example of using trailing return type. but i think void
+               // prefix
+  for (auto it = j.begin(); it != j.end(); ++it) {
+    if (it.key() == "children")
+      recursive_json_iterate_if(
+          *it,
+          f);  // this needs to be changed since children
+               // is an array. not sure what happens when the iterator is
+               // dereferenced when pointing to the key coresponding to json
+               // array
+    else
+      f(it);
+  }
+};
+
+// cleans manifest
+auto clean_manifest(json& manifest) -> void;
 #endif

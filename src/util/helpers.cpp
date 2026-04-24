@@ -6,8 +6,10 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <toml++/toml.hpp>
+#include <unordered_set>
 
 namespace fs = std::filesystem;
 std::string user_os{};
@@ -164,3 +166,15 @@ fs::path retrieve_instance_dir() {
 
   return {*instances};
 };
+
+// note that we want to clean starting from the file tree
+auto clean_manifest(json& manifest) -> void {
+  // might end up using last updated field in the future***
+  std::unordered_set<std::string> to_clean{"name", "block_size", "file_size",
+                                           "last_updated", "type"};
+  auto clean_function = [&](json::iterator& it) {
+    if (to_clean.contains(it.key())) manifest.erase(it);
+  };
+
+  recursive_json_iterate_if(manifest, clean_function);
+}

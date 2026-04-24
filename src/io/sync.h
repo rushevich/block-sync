@@ -5,10 +5,13 @@
 // the goal of this header file is to provide functionality for syncing between
 // manifests
 
-// returns a vector of the differing hash indices
-std::vector<int> find_hash_diffs(std::vector<std::string> current_hashes,
-                                 std::vector<std::string> new_hashes);
+// returns a vector containing relative (to instance root) paths to all
+// differing files. assume that both files are json.
+std::vector<std::string> find_differing_files(std::string current_manifest,
+                                              std::string new_manifest);
 
-// returns true if the hashes differ and false otherwise.
-bool hash_diff(std::string hash1, std::string hash2);
+// true if blocks differ
+bool file_changed(const std::vector<std::string>& current_hashes,
+                  const std::vector<std::string>& new_hashes);
+
 #endif
