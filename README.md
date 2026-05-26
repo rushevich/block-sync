@@ -25,12 +25,12 @@ _Ordering reflects a **small** amount of precedence: earlier rows tend to unbloc
 | --- | --- |
 | Chunked file hashing (SHA-256 per block) | Done |
 | CLI: Prism path → `prismlauncher.cfg` → instance pick | Done |
-| Robust cfg parsing & cross-platform paths | In Progress |
-| Sweeping Error Handling | In Progress |
+| Robust cfg parsing & cross-platform paths | Done(ish) |
+| Sweeping Error Handling | Planned |
 | Basic CI workflow | Planned |
-| Prism/instance discovery in its own module | Planned |
+| Prism/instance discovery in its own module | Done |
 | Manifest writing | Done |
-| Sync (manifest parsing/processing) | Planned |
+| Sync (manifest parsing/processing) | Done |
 | Tests | Planned |
 | Hashing (mmap) and other optimization | Planned |
 | Migration from CLI to basic GUI | Planned |
