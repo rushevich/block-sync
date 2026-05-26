@@ -3,29 +3,31 @@
 #include <openssl/evp.h>
 
 #include <cstddef>
-#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <sstream>
 #include <string>
 
-#define MEGABYTE 1024 * 1024
+namespace fs = std::filesystem;
 
-HashedFile::HashedFile(const fs::path& p, const uintmax_t& sz)
-    : hashed_blocks_{},
-      file_path_{p},
+namespace blocksync::core {
+
+constexpr std::size_t kBlockSize = 1024 * 1024;
+
+HashedFile::HashedFile(const fs::path& p, const std::uintmax_t& sz)
+    : file_path_{p},
       hash_time_{},
+      hashed_blocks_{},
       block_size_{sz},
       file_size_{fs::file_size(p)} {};
 
 HashedFile::HashedFile(HashedFile&& other) noexcept
-    : hashed_blocks_{std::move(other.hashed_blocks_)},
-      file_path_{std::move(other.file_path_)},
+    : file_path_{std::move(other.file_path_)},
       hash_time_{std::move(other.hash_time_)},
-      block_size_(std::move(other.block_size_)),
-      file_size_(std::move(other.file_size_)) {};
+      hashed_blocks_{std::move(other.hashed_blocks_)},
+      block_size_(other.block_size_),
+      file_size_(other.file_size_) {};
 
 std::string hash_block(const std::span<const unsigned char>& block_data) {
   auto ctx = std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)>(
@@ -47,9 +49,9 @@ std::string hash_block(const std::span<const unsigned char>& block_data) {
 
 // reads the file in chunks of 1MB and hashes each chunk
 HashedFile hash_file(const fs::path& input_file_path) {
-  HashedFile hf{input_file_path, MEGABYTE};
+  HashedFile hf{input_file_path, kBlockSize};
 
-  uintmax_t block_size{MEGABYTE};
+  std::uintmax_t block_size{kBlockSize};
   std::vector<unsigned char> buf(block_size);
   std::ifstream file(input_file_path, std::ios::binary);
 
@@ -64,3 +66,5 @@ HashedFile hash_file(const fs::path& input_file_path) {
   hf.update_write_time();
   return hf;
 };
+
+}  // namespace blocksync::core

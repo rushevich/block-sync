@@ -3,13 +3,15 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 
-#include "nlohmann/json_fwd.hpp"
+namespace blocksync::io {
 
-namespace fs = std::filesystem;
-using json = nlohmann::json;
-void write_manifest(const fs::path& destination_path,
-                    const fs::path& instance_path);
+void write_manifest(const std::filesystem::path& destination_path,
+                    const std::filesystem::path& instance_path);
 
-json build_tree(const fs::path&, const fs::path&);
+// recursively builds the manifest tree node for cur_path, paths relative to
+// instance_root
+nlohmann::json build_tree(const std::filesystem::path& cur_path,
+                          const std::filesystem::path& instance_root);
 
+}  // namespace blocksync::io
 #endif

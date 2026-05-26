@@ -2,17 +2,21 @@
 
 #include <filesystem>
 #include <fstream>
-#include <nlohmann/json.hpp>
 #include <stdexcept>
 
-#include "../core/hashing.h"
+#include "core/hashing.h"
+#include "util/time.h"
 
+namespace fs = std::filesystem;
 using json = nlohmann::json;
+
+namespace blocksync::io {
+
 void write_manifest(const fs::path& destination_path,
                     const fs::path& instance_path) {
   json manifest;
   manifest["instance_name"] = instance_path.filename().string();
-  manifest["last_updated"] = get_iso8601_time();
+  manifest["last_updated"] = util::get_iso8601_time();
   manifest["tree"].push_back(build_tree(instance_path, instance_path));
   std::ofstream output_manifest(destination_path / "manifest.json");
   if (!output_manifest) {
@@ -25,9 +29,7 @@ void write_manifest(const fs::path& destination_path,
   output_manifest.close();
 };
 
-json build_tree(
-    const fs::path& cur_path,
-    const fs::path& instance_root) {  // recursively construct the tree
+json build_tree(const fs::path& cur_path, const fs::path& instance_root) {
   json node;
 
   node["name"] = cur_path.filename().string();
@@ -39,13 +41,11 @@ json build_tree(
     if (entry.is_directory()) {
       node["children"].push_back(build_tree(entry.path(), instance_root));
     } else {
-      // call hash file. but i will add more members to HashedFile so that this
-      // code can be simpler.
       json file_node;
       file_node["name"] = entry.path().filename().string();
       file_node["type"] = "file";
       file_node["path"] = fs::relative(entry.path(), instance_root).string();
-      HashedFile hf(hash_file(entry));
+      core::HashedFile hf(core::hash_file(entry));
       file_node["last_updated"] = hf.hash_time();
       file_node["block_size"] = hf.block_size();
       file_node["file_size"] = hf.file_size();
@@ -55,3 +55,5 @@ json build_tree(
   }
   return node;
 };
+
+}  // namespace blocksync::io
