@@ -8,7 +8,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
-#include <toml++/toml.hpp>
+#include <toml++/toml.h>
 #include <unordered_set>
 
 namespace fs = std::filesystem;
