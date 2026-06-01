@@ -26,24 +26,22 @@ _Ordering reflects a **small** amount of precedence: earlier rows tend to unbloc
 | Chunked file hashing (SHA-256 per block) | Done |
 | CLI: Prism path → `prismlauncher.cfg` → instance pick | Done |
 | Robust cfg parsing & cross-platform paths | Done(ish) |
-| Sweeping Error Handling | Planned |
-| Basic CI workflow | Planned |
+| Sweeping Error Handling | Deferred |
+| Basic CI workflow | Deferred |
 | Prism/instance discovery in its own module | Done |
 | Manifest writing | Done |
 | Sync (manifest parsing/processing) | Done |
 | Tests | Planned |
-| Hashing (mmap) and other optimization | Planned |
-| Migration from CLI to basic GUI | Planned |
-| Monolith server integration | Planned |
+| Hashing (mmap) and other optimization | Deferred |
+| Migration from CLI to basic GUI | Deferred |
+| Manifest Databas | 多分 Deferred |
 
 ## Directory layout
 
-The current layout (`src/main.cpp`, `src/core/`, `src/util/`) is **provisional**. It is enough for early work and may move as the codebase grows.
-
-When complexity warrants it, a likely direction is: a small **library target** for sync, hashing, and manifests (e.g. under `src/blocksync/` or similar), a thin **CLI entry** (e.g. `src/cli/main.cpp`), a **Prism-focused module** for launcher paths and config, optional **`include/<project>/`** headers if the library is reused or installed, and **`tests/`** laid out to mirror the library. None of that is required until maintenance or feature size makes the split worthwhile.
+*To be revised.*
 
 ## Contributing
 
-Currently I would like to continue being the sole contributor, due to the educational nature of the project. This section is mostly for completeness, since I don't expect this idea to take off and see massive interest anyway. With that said though, I **greatly** appreciate any feedback, comments, or new implementation ideas - I'm programming this off the dome so I certainly have made and will make poor design choices, so any pointers (lol) are very welcome.
+Message me if you want to contribute for some reason.
 
 *DISCLAIMER*: AI was used to assist in writing this markdown file.
