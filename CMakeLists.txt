@@ -2,24 +2,35 @@ cmake_minimum_required(VERSION 3.15)
 project(block-sync VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_library(blocksync_warnings INTERFACE)
+target_compile_options(blocksync_warnings INTERFACE -Wall -Wextra)
+
 include(FetchContent)
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+
+FetchContent_Declare(json
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
 FetchContent_MakeAvailable(json)
 
-FetchContent_Declare(
-    tomlplusplus
-    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        v3.4.0
+FetchContent_Declare(tomlplusplus
+    URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.4.0.tar.gz
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
+set(DOCTEST_VERSION v2.4.11)
+FetchContent_Declare(doctest
+    URL https://raw.githubusercontent.com/doctest/doctest/${DOCTEST_VERSION}/doctest/doctest.h
+    DOWNLOAD_NO_EXTRACT TRUE
+)
+FetchContent_MakeAvailable(doctest)
+set(DOCTEST_INCLUDE_DIR ${doctest_SOURCE_DIR})
+
 find_package(OpenSSL REQUIRED)
 
-add_executable(block-sync
-    src/main.cpp
+add_library(blocksync_lib STATIC
     src/cli/console.cpp
     src/config/config.cpp
     src/platform/platform.cpp
@@ -29,7 +40,13 @@ add_executable(block-sync
     src/io/sync.cpp
     src/util/time.cpp
 )
+target_include_directories(blocksync_lib PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(blocksync_lib
+    PUBLIC OpenSSL::Crypto nlohmann_json::nlohmann_json tomlplusplus::tomlplusplus
+    PRIVATE blocksync_warnings)
 
-target_include_directories(block-sync PRIVATE ${CMAKE_SOURCE_DIR}/src)
+add_executable(block-sync src/main.cpp)
+target_link_libraries(block-sync PRIVATE blocksync_lib blocksync_warnings)
 
-target_link_libraries(block-sync PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json tomlplusplus::tomlplusplus)
+enable_testing()
+add_subdirectory(tests)

@@ -41,19 +41,19 @@ void flatten_to_map(json const &node, PathMap &out) {
   }
 }
 
-Diff compute_diff(PathMap const &source, PathMap const &dest) {
+Diff compute_diff(PathMap const &current, PathMap const &old) {
   Diff d;
-  for (auto const &[path, hashes] : source) {
-    auto it = dest.find(path);
-    if (it == dest.end()) {
+  for (auto const &[path, hashes] : current) {
+    auto it = old.find(path);
+    if (it == old.end()) {
       d.to_send.push_back(path);
     } else if (it->second != hashes) {
       d.to_send.push_back(path);
     }
   }
 
-  for (auto const &[path, hashes] : dest) {
-    if (!source.contains(path)) {
+  for (auto const &[path, hashes] : old) {
+    if (!current.contains(path)) {
       d.to_delete.push_back(path);
     }
   }
