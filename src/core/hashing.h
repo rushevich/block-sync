@@ -13,56 +13,53 @@
 namespace blocksync::core {
 
 struct HashedFile {
-  HashedFile(const std::filesystem::path& p, const std::uintmax_t& sz);
+    explicit HashedFile(
+        std::filesystem::path const& p /*, const std::uintmax_t& sz*/);
 
-  HashedFile() = delete;  // disallow inexplicit construction
+    HashedFile() = delete; // disallow inexplicit construction
 
-  HashedFile(const HashedFile&) = delete;             // copy constructor
-  HashedFile& operator=(const HashedFile&) = delete;  // copy assignment
+    // implicit, but for clarity, delete
+    HashedFile(HashedFile const&)            = delete; // copy constructor
+    HashedFile& operator=(HashedFile const&) = delete; // copy assignment
 
-  HashedFile(HashedFile&& other) noexcept;
+    HashedFile(HashedFile&& other) noexcept = default;
 
-  HashedFile& operator=(HashedFile&& other) noexcept {
-    if (this != &other) {
-      file_path_ = std::move(other.file_path_);
-      hash_time_ = std::move(other.hash_time_);
-      hashed_blocks_ = std::move(other.hashed_blocks_);
-      block_size_ = other.block_size_;
-      file_size_ = other.file_size_;
-    }
-    return *this;
-  };  // move assignment
+    HashedFile& operator=(HashedFile&& other) noexcept = default;
 
-  const std::filesystem::path& file_path() const { return file_path_; }
+    std::filesystem::path const& file_path() const { return m_file_path; }
 
-  std::string hash_time() const { return hash_time_; }
+    std::string hash_time() const { return m_hash_time; }
 
-  void update_write_time() { hash_time_ = util::get_iso8601_time(); }
+    void update_write_time() { m_hash_time = util::get_iso8601_time(); }
 
-  const std::vector<std::string>& hashed_blocks() const {
-    return hashed_blocks_;
-  }
+    // std::vector<std::string> const& hashed_blocks() const {
+    //     return hashed_blocks_;
+    // }
+    inline auto hash() const { return m_hash; }
 
-  void add_hash(std::string hash) {
-    hashed_blocks_.emplace_back(std::move(hash));
-  };
+    void set_hash(std::string hash) { m_hash = hash; };
 
-  std::uintmax_t file_size() const { return file_size_; }
+    std::uintmax_t file_size() const { return m_file_size; }
 
-  std::uintmax_t block_size() const { return block_size_; }
+    void update_file_size(size_t upd) { m_file_size = upd; }
 
- private:
-  std::filesystem::path file_path_;
-  std::string hash_time_;  // iso 8601 fmt
-  std::vector<std::string> hashed_blocks_;
-  std::uintmax_t block_size_;  // in bytes
-  std::uintmax_t file_size_;   // in bytes
+    // std::uintmax_t block_size() const { return block_size_; }
+
+  private:
+    std::filesystem::path m_file_path;
+    std::string           m_hash_time; // iso 8601 fmt
+    std::string           m_hash;
+    std::uintmax_t        m_file_size; // in bytes
+                                // std::vector<std::string> hashed_blocks_;
+                                // std::uintmax_t block_size_;  // in bytes
 };
 
-std::string hash_block(const std::span<const unsigned char>& block_data);
+// std::string hash_block(const std::span<const unsigned char>& block_data);
 
-HashedFile hash_file(const std::filesystem::path& input_file_path);
+// HashedFile hash_file(std::filesystem::path const& input_file_path);
 
-}  // namespace blocksync::core
+HashedFile hash_file_once(std::filesystem::path const& input_file_path);
+
+} // namespace blocksync::core
 
 #endif

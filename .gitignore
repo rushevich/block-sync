@@ -1,3 +1,6 @@
+/*.json
 /build
 /.vscode
 /.cache
+/.*
+/src/.*
