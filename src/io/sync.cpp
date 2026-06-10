@@ -7,43 +7,43 @@ namespace blocksync::io {
 
 using json = nlohmann::json;
 
-Diff find_differing_files(const std::string& current_manifest_name,
-                          const std::string& new_manifest_name) {
-  std::ifstream if1{current_manifest_name};
-  json cur_man;
-  if1 >> cur_man;
-
-  std::ifstream if2{new_manifest_name};
-  json new_man;
-  if2 >> new_man;
-
-  // strips useless fields to improve processing speed
-  clean_manifest(cur_man["tree"]);
-  clean_manifest(new_man["tree"]);
-
-  // build path -> hashes maps for each manifest, then diff
-  PathMap cur_map;
-  PathMap new_map;
-
-  flatten_to_map(cur_man.at("tree"), cur_map);
-  flatten_to_map(new_man.at("tree"), new_map);
-
+Diff diff_manifests(json const &current_manifest, json const &new_manifest) {
+  json nw = new_manifest; // copy
+  json cur = current_manifest;
+  clean_manifest(cur["tree"]);
+  clean_manifest(nw["tree"]);
+  PathMap cur_map, new_map;
+  flatten_to_map(cur.at("tree"), cur_map);
+  flatten_to_map(nw.at("tree"), new_map);
   return compute_diff(new_map, cur_map);
 }
 
-void flatten_to_map(const json& node, PathMap& out) {
+Diff find_differing_files(std::string const &current_manifest_name,
+                          std::string const &new_manifest_name) {
+  std::ifstream if1{current_manifest_name};
+  std::ifstream if2{new_manifest_name};
+  json cur_man;
+  json new_man;
+  if1 >> cur_man;
+  if2 >> new_man;
+  return diff_manifests(cur_man, new_man);
+}
+
+void flatten_to_map(json const &node, PathMap &out) {
   if (node.contains("children")) {
-    for (const auto& child : node.at("children")) {
+    for (auto const &child : node.at("children")) {
       flatten_to_map(child, out);
     }
   } else if (node.contains("hashes")) {
-    out[node.at("path")] = node.at("hashes").get<std::vector<std::string>>();
+    // out[node.at("path")] =
+    // node.at("hashes").get<std::vector<std::string>>();
+    out[node.at("path")] = node.at("hash").get<std::string>();
   }
 }
 
-Diff compute_diff(const PathMap& source, const PathMap& dest) {
+Diff compute_diff(PathMap const &source, PathMap const &dest) {
   Diff d;
-  for (const auto& [path, hashes] : source) {
+  for (auto const &[path, hashes] : source) {
     auto it = dest.find(path);
     if (it == dest.end()) {
       d.to_send.push_back(path);
@@ -52,7 +52,7 @@ Diff compute_diff(const PathMap& source, const PathMap& dest) {
     }
   }
 
-  for (const auto& [path, hashes] : dest) {
+  for (auto const &[path, hashes] : dest) {
     if (!source.contains(path)) {
       d.to_delete.push_back(path);
     }
@@ -60,9 +60,8 @@ Diff compute_diff(const PathMap& source, const PathMap& dest) {
   return d;
 }
 
-// erase-safe (erase returns next iterator); walks both objects and arrays.
-void clean_manifest(json& node) {
-  static const std::unordered_set<std::string> to_clean{
+void clean_manifest(json &node) {
+  static std::unordered_set<std::string> const to_clean{
       "name", "block_size", "file_size", "last_updated", "type"};
 
   if (node.is_object()) {
@@ -75,10 +74,10 @@ void clean_manifest(json& node) {
       }
     }
   } else if (node.is_array()) {
-    for (auto& element : node) {
+    for (auto &element : node) {
       clean_manifest(element);
     }
   }
 }
 
-}  // namespace blocksync::io
+} // namespace blocksync::io
