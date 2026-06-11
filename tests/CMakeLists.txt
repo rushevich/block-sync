@@ -5,5 +5,6 @@ add_executable(blocksync_tests
 )
 target_include_directories(blocksync_tests PRIVATE ${DOCTEST_INCLUDE_DIR})
 target_link_libraries(blocksync_tests PRIVATE blocksync_lib)
-
+target_compile_definitions(blocksync_tests PRIVATE
+    BLOCKSYNC_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
 add_test(NAME blocksync_tests COMMAND blocksync_tests)

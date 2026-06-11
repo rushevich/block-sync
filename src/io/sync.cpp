@@ -30,30 +30,34 @@ Diff find_differing_files(std::string const &current_manifest_name,
 }
 
 void flatten_to_map(json const &node, PathMap &out) {
-  if (node.contains("children")) {
+  if (node.is_array()) {
+    for (auto const &element : node) {
+      flatten_to_map(element, out);
+    }
+  } else if (node.contains("children")) {
     for (auto const &child : node.at("children")) {
       flatten_to_map(child, out);
     }
-  } else if (node.contains("hashes")) {
+  } else if (node.contains("hash")) {
     // out[node.at("path")] =
     // node.at("hashes").get<std::vector<std::string>>();
     out[node.at("path")] = node.at("hash").get<std::string>();
   }
 }
 
-Diff compute_diff(PathMap const &current, PathMap const &old) {
+Diff compute_diff(PathMap const &new_map, PathMap const &current_map) {
   Diff d;
-  for (auto const &[path, hashes] : current) {
-    auto it = old.find(path);
-    if (it == old.end()) {
+  for (auto const &[path, hashes] : new_map) {
+    auto it = current_map.find(path);
+    if (it == current_map.end()) {
       d.to_send.push_back(path);
     } else if (it->second != hashes) {
       d.to_send.push_back(path);
     }
   }
 
-  for (auto const &[path, hashes] : old) {
-    if (!current.contains(path)) {
+  for (auto const &[path, hashes] : current_map) {
+    if (!new_map.contains(path)) {
       d.to_delete.push_back(path);
     }
   }

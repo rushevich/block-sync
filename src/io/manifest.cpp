@@ -1,8 +1,10 @@
 #include "manifest.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <vector>
 
 #include "core/hashing.h"
 #include "util/time.h"
@@ -35,6 +37,11 @@ json build_tree(fs::path const &cur_path, fs::path const &instance_root) {
   node["type"] = "directory";
   node["path"] = fs::relative(cur_path, instance_root).string();
   node["children"] = json::array();
+  std::vector<fs::directory_entry> entries(fs::directory_iterator(cur_path),
+                                           fs::directory_iterator{});
+  std::sort(
+      entries.begin(), entries.end(),
+      [](auto const &lhs, auto const &rhs) { return lhs.path() < rhs.path(); });
   for (auto const &entry : fs::directory_iterator(cur_path)) {
     if (entry.is_directory()) {
       node["children"].push_back(build_tree(entry.path(), instance_root));
