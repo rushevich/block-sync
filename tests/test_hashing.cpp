@@ -1,5 +1,5 @@
 #include "core/hashing.h"
-#include "doctest.h"
+#include <doctest/doctest.h>
 #include <filesystem>
 #include <fstream>
 #include <string>

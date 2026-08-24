@@ -1,35 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 project(block-sync VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(blocksync_warnings INTERFACE)
-target_compile_options(blocksync_warnings INTERFACE -Wall -Wextra)
-
-include(FetchContent)
-
-FetchContent_Declare(json
-    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
-
-FetchContent_Declare(tomlplusplus
-    URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.4.0.tar.gz
-)
-FetchContent_MakeAvailable(tomlplusplus)
+target_compile_options(blocksync_warnings INTERFACE -Wall -Wextra -Werror)
 
 set(DOCTEST_VERSION v2.4.11)
-FetchContent_Declare(doctest
-    URL https://raw.githubusercontent.com/doctest/doctest/${DOCTEST_VERSION}/doctest/doctest.h
-    DOWNLOAD_NO_EXTRACT TRUE
-)
-FetchContent_MakeAvailable(doctest)
-set(DOCTEST_INCLUDE_DIR ${doctest_SOURCE_DIR})
 
 find_package(OpenSSL REQUIRED)
-
+find_package(nlohmann_json REQUIRED)
+find_package(doctest REQUIRED)
+find_package(tomlplusplus REQUIRED)
 add_library(blocksync_lib STATIC
     src/cli/console.cpp
     src/config/config.cpp

@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include <doctest/doctest.h>
 #include "io/sync.h"
 #include <fstream>
 #include <nlohmann/json.hpp>

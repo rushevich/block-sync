@@ -4,3 +4,4 @@
 /.cache
 /.*
 /src/.*
+flake.lock
